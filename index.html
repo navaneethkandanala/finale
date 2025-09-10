@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andhra Pradesh Financial Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <header class="bg-white rounded-xl shadow-lg p-6 mb-8 flex flex-col md:flex-row items-center justify-between">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Andhra Pradesh Financial Dashboard</h1>
+            <div class="text-sm text-gray-500">
+                <span id="current-date"></span>
+            </div>
+        </header>
+
+        <!-- Cards & Metrics Section -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Total Cards</h3>
+                <p id="total-cards" class="text-4xl font-bold text-blue-600">0</p>
+                <p class="text-sm text-gray-500 mt-2">Active Credit & Debit Cards</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Debit Cards</h3>
+                <p id="debit-cards" class="text-4xl font-bold text-green-600">0</p>
+                <p class="text-sm text-gray-500 mt-2">Active Debit Cards</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Credit Cards</h3>
+                <p id="credit-cards" class="text-4xl font-bold text-red-600">0</p>
+                <p class="text-sm text-gray-500 mt-2">Active Credit Cards</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Avg. Annual Fee</h3>
+                <p id="avg-fee" class="text-4xl font-bold text-purple-600">₹0</p>
+                <p class="text-sm text-gray-500 mt-2">For Credit Cards</p>
+            </div>
+        </section>
+
+        <!-- Data Tables & Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Card Information Table -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-6 overflow-x-auto">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Credit & Debit Card Information</h2>
+                <table class="w-full text-left whitespace-nowrap">
+                    <thead>
+                        <tr class="text-gray-500 uppercase text-xs font-semibold tracking-wider border-b">
+                            <th class="py-3 px-4">Bank</th>
+                            <th class="py-3 px-4">Card Type</th>
+                            <th class="py-3 px-4">Card Name</th>
+                            <th class="py-3 px-4">Features</th>
+                            <th class="py-3 px-4">Annual Fee (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="card-data-table" class="divide-y divide-gray-200">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Collection Status Chart -->
+            <div class="lg:col-span-1 bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Collections Status (Mock Data)</h2>
+                <canvas id="collectionsChart" class="w-full"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Mock Data for demonstration purposes
+            const cardData = [
+                { bank: "SBI", type: "Credit", name: "SimplySAVE", features: "Rewards, fuel surcharge waiver", fee: 499 },
+                { bank: "HDFC Bank", type: "Debit", name: "EasyShop Platinum", features: "High daily limits, cashback", fee: 0 },
+                { bank: "ICICI Bank", type: "Credit", name: "Amazon Pay", features: "No annual fee, 5% Amazon rewards", fee: 0 },
+                { bank: "Axis Bank", type: "Credit", name: "Neo", features: "Discounts on online shopping", fee: 250 },
+                { bank: "Andhra Bank", type: "Debit", name: "RuPay Debit Card", features: "Acceptable at all ATMs, POS", fee: 0 },
+                { bank: "Canara Bank", type: "Debit", name: "MasterCard", features: "Global acceptance, secured transactions", fee: 0 },
+                { bank: "Union Bank", type: "Credit", name: "Uni Carbon", features: "Airline miles, lounge access", fee: 999 },
+            ];
+
+            const collectionData = {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                datasets: [
+                    {
+                        label: 'Successful Collections (Lakhs)',
+                        data: [120, 150, 135, 170, 160, 185],
+                        backgroundColor: '#22c55e',
+                        borderColor: '#22c55e',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barPercentage: 0.6,
+                    },
+                    {
+                        label: 'Outstanding Dues (Lakhs)',
+                        data: [45, 30, 40, 25, 35, 20],
+                        backgroundColor: '#ef4444',
+                        borderColor: '#ef4444',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barPercentage: 0.6,
+                    }
+                ]
+            };
+
+            // Display current date
+            const dateElement = document.getElementById('current-date');
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateElement.textContent = now.toLocaleDateString('en-US', options);
+
+            // Populate metrics
+            const totalCards = cardData.length;
+            const debitCards = cardData.filter(card => card.type === "Debit").length;
+            const creditCards = cardData.filter(card => card.type === "Credit").length;
+            const totalFee = cardData.filter(card => card.type === "Credit").reduce((sum, card) => sum + card.fee, 0);
+            const avgFee = creditCards > 0 ? (totalFee / creditCards).toFixed(2) : 0;
+
+            document.getElementById('total-cards').textContent = totalCards;
+            document.getElementById('debit-cards').textContent = debitCards;
+            document.getElementById('credit-cards').textContent = creditCards;
+            document.getElementById('avg-fee').textContent = `₹${avgFee}`;
+
+            // Populate card data table
+            const tableBody = document.getElementById('card-data-table');
+            cardData.forEach(card => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-50 transition-colors";
+                row.innerHTML = `
+                    <td class="py-3 px-4 font-medium text-gray-900">${card.bank}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${card.type === 'Credit' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">${card.type}</span></td>
+                    <td class="py-3 px-4 text-gray-600">${card.name}</td>
+                    <td class="py-3 px-4 text-gray-600">${card.features}</td>
+                    <td class="py-3 px-4 text-gray-600">₹${card.fee}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Create Collections Chart
+            const ctx = document.getElementById('collectionsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: collectionData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { display: false },
+                            ticks: { callback: (value) => `₹${value}` }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ₹${context.parsed.y} Lakhs`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
